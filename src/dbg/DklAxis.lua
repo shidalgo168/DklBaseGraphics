@@ -17,18 +17,23 @@ function DklBaseGraphics:axis(side,args)
 	local axisMode = ((side == 2) or (side == 3)) and -1 or 1
 	local labels = args.labels
 	local at = args.at or (labels and seq(0,#labels,1))
-	
 	local xlim = self.fig.xlim
 	local ylim = self.fig.ylim
-	
 	if (at==nil) then
 		if (side==1 or side==3) then
-			at = seq(xlim[1],xlim[2],math.floor(100/self.dev.size[1]*self.plt.usr[2]))
+			if((100/self.dev.size[1]*self.plt.usr[2]) < 1) then
+				at = seq(xlim[1],xlim[2],math.floor(1))
+			else
+				at = seq(xlim[1],xlim[2],math.floor(100/self.dev.size[1]*self.plt.usr[2]))
+			end
 		elseif (side == 2 or side==4) then
-			at = seq(ylim[1],ylim[2],math.floor(100/self.dev.size[2]*self.plt.usr[4]))
+			if((100/self.dev.size[1]*self.plt.usr[4]) < 1) then
+				at = seq(xlim[1],xlim[2],math.floor(1))
+			else
+				at = seq(ylim[1],ylim[2],math.floor(100/self.dev.size[2]*self.plt.usr[4]))
+			end
 		end
 	end
-	
 	labels = labels or at
 	
 	stroke(0)

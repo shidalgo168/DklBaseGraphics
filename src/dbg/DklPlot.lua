@@ -15,8 +15,35 @@ require "dbg/DklAxis"
 
 function DklBaseGraphics:plot(x,y,args)
 	args = args or {}
-	local xlim = xlim or range(x)
-	local ylim = ylim or range(y)
+	local xlim
+	local ylim
+	local mode
+	if(args.type=="w") then
+		xlim = range(x)
+		if(xlim[2] > #x)then
+			xlim = wrange(x)
+			mode = "hor"
+		else
+			ylim = wrange(y)
+			mode = "ver"
+		end
+		args.mode = mode
+	elseif(args.type=="s") then
+		if(type(x[1]) == "table")then		
+			xlim = stackrange(x)
+			mode = "hor"
+		else
+			ylim = stackrange(y)
+			mode = "ver"
+		end
+		args.mode = mode
+	end
+	if(xlim == nil)then
+		xlim = range(x)
+	end
+	if(ylim == nil)then
+		ylim = range(y)
+	end
 	self:plot_new()
 	self:plot_window(xlim,ylim,args)
 	
@@ -24,17 +51,24 @@ function DklBaseGraphics:plot(x,y,args)
 	local ann = args.axes or self.plt.ann
 	local bty = args.bty or "o"
 	local type = args.type or "p"
-
-	if (type=="p" or type=="o" or type=="b") then
+	if(type=="w") then
+		self:waterfall(x,y,args)
+	elseif(type=="s")then
+		self:stacked(x,y,args)
+	elseif (type=="p" or type=="o" or type=="b") then
 		self:points(x,y,args)
 	elseif (type=="l" or type=="o" or type=="b") then
 		self:lines(x,y,args)
 	end
+	
 	if (axes) then
+		
 		self:axis(1,args)
 		self:axis(2,args)
 		self:box({which="plot",bty=bty})
+
 	end
+	
 	if (ann) then
 		self:title(args)
 	end
@@ -104,7 +138,6 @@ function DklBaseGraphics:lines(x,y,args)
 		vertex(x[i]*self.plt.xscl,-y[i]*self.plt.yscl)
 	end
 	endShape()
-	
 	popMatrix()
 end
 
@@ -181,3 +214,4 @@ function DklBaseGraphics:identify(x,y,args)
 	noEvent()
 	return self.fig.selection
 end
+
